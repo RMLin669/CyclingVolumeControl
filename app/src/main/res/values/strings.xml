@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">CyclingVolumeControl</string>
+    <string-array name="sampling_options">
+        <item>1s (实时)</item>
+        <item>3s (平滑)</item>
+        <item>5s (极稳)</item>
+    </string-array>
+    <array name="initial_range_values">
+        <item>20.0</item>
+        <item>100.0</item>
+    </array>
+</resources>
