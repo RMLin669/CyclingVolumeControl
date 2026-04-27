@@ -142,7 +142,7 @@ class MainActivity : AppCompatActivity() {
         btnShowPrivacy.setOnClickListener {
             val privacyMessage = """
                 🔒 隐私说明：
-                本 App 获取的位置信息仅用于实时计算速度以调节音量，绝不会进行任何形式的上传或共享。
+                本 App 获取的位置信息仅用于实时计算速度以调节音量，绝不会进行任何形式的上传或共享。如仍有担忧，您可以在手机系统的「设置」中手动关闭本 App 的联网权限，这不会影响速度监测功能。
                 
                 💡 使用建议：
                 1. 在多任务界面【锁定】本 App。
