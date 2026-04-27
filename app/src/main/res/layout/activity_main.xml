@@ -65,6 +65,44 @@
         android:textSize="25sp"
         android:textColor="?android:attr/colorPrimary"/>
 
+    <!-- 找到 volumeText 下方，插入以下代码 -->
+    <TextView
+        android:id="@+id/deviceTypeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="当前设备: 检测中..."
+        android:textSize="14sp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:background="@drawable/bg_picker_selection"
+        android:textColor="?android:attr/colorPrimary"
+        android:textStyle="bold" />
+
+    <!-- 在 deviceTypeText 下方插入 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="检测到该设备后自动开启控制"
+            android:textSize="13sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/autoStartSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:scaleX="0.8"
+            android:scaleY="0.8" />
+    </LinearLayout>
+
     <!-- 4. 采样平滑设置 -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -247,7 +285,7 @@
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
         android:padding="16dp"
-        android:text="当前速度与音量开始控制后才会实时更新。\n开始控制后速度采样、速度区间与音量区间均不可调节，如需调节请先停止控制。"
+        android:text="当前速度与音量开始控制后才会实时更新。\n监控过程中，您可以随时调节速度区间与音量区间，设置将立即生效。"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="12sp"
         android:lineSpacingExtra="4dp"
