@@ -8,17 +8,26 @@
     android:gravity="top|center_horizontal"
     android:background="?android:attr/colorBackground">
 
-    <!-- 1. 隐私安全提示 -->
-    <TextView
+    <!-- 1. 隐私安全提示 - 修改为按钮触发弹窗 -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:padding="16dp"
-        android:text="🔒 隐私说明：本 App 获取的位置信息仅用于实时计算速度以调节音量，绝不会进行任何形式的上报。如仍有担忧，您可以在手机系统的“设置”中手动关闭本 App 的联网权限，这不影响速度监控功能。\n\n为防止骑行过程中被杀后台，请在任务切换界面锁定本 App 、修改本 App 省电模式为无限制并关闭手机的省电模式。"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="12sp"
-        android:lineSpacingExtra="4dp"
-        android:layout_marginBottom="0dp" />
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="0dp">
+
+        <Button
+            android:id="@+id/btnShowPrivacy"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点击查看隐私说明与使用建议 ▾"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <!-- 注意：这里删除了之前的 privacyDetailsText，因为我们要用弹窗显示 -->
+    </LinearLayout>
+
 
     <!-- 2. 权限行：修改按钮样式为有背景的样式 -->
     <LinearLayout
@@ -27,7 +36,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginBottom="0dp"
-        android:paddingHorizontal="60dp">
+        android:paddingHorizontal="70dp">
 
         <TextView
             android:layout_width="0dp"
@@ -65,13 +74,13 @@
         android:textSize="25sp"
         android:textColor="?android:attr/colorPrimary"/>
 
-    <!-- 找到 volumeText 下方，插入以下代码 -->
+    <!-- 修改设备显示文本的 ID 含义 -->
     <TextView
         android:id="@+id/deviceTypeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:text="当前设备: 检测中..."
+        android:text="当前配置: 检测中..."
         android:textSize="14sp"
         android:paddingHorizontal="12dp"
         android:paddingVertical="4dp"
@@ -90,7 +99,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="检测到该设备后自动开启控制"
+            android:text="打开 App 后自动开启控制"
             android:textSize="13sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -285,7 +294,7 @@
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
         android:padding="16dp"
-        android:text="当前速度与音量开始控制后才会实时更新。\n监控过程中，您可以随时调节速度区间与音量区间，设置将立即生效。"
+        android:text="当前速度与音量开始控制后才会实时更新。\n控制过程中无法调节速度区间与音量区间，如需调节请先暂停控制。"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="12sp"
         android:lineSpacingExtra="4dp"
