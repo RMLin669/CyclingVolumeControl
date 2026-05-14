@@ -37,7 +37,9 @@ class MainActivity : AppCompatActivity() {
     private val speedHistory = mutableListOf<Float>()
 
     private lateinit var autoStartSwitch: com.google.android.material.materialswitch.MaterialSwitch
+    private lateinit var persistNotifSwitch: com.google.android.material.materialswitch.MaterialSwitch
     private val KEY_AUTO_START = "auto_start"
+    private val KEY_PERSIST_NOTIF = "persist_notif"
 
     // 实时数值
     private var minSpeed = 5f
@@ -75,7 +77,10 @@ class MainActivity : AppCompatActivity() {
 
     private val requestLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { _ -> updateUIState() }
+    ) { _ ->
+        updateUIState()
+        if (persistNotifSwitch.isChecked) showPersistNotification()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,6 +105,7 @@ class MainActivity : AppCompatActivity() {
         npMaxUnit = findViewById(R.id.npMaxUnit)
         deviceTypeText = findViewById(R.id.deviceTypeText)
         autoStartSwitch = findViewById(R.id.autoStartSwitch)
+        persistNotifSwitch = findViewById(R.id.persistNotifSwitch)
 
         // 3. 基础组件初始化（仅设置适配器，不执行读取逻辑）
         setupSamplingSpinner()
@@ -112,6 +118,21 @@ class MainActivity : AppCompatActivity() {
             if (autoStartSwitch.isChecked && !isMonitoring) {
                 startSpeedMonitoring()
             }
+        }
+
+        persistNotifSwitch.setOnClickListener {
+            saveSettings()
+            if (persistNotifSwitch.isChecked) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    requestLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.POST_NOTIFICATIONS))
+                } else {
+                    showPersistNotification()
+                }
+            } else {
+                cancelPersistNotification()
+            }
+            if (isMonitoring) syncToService()
         }
 
         // 5. 初始检测设备：此时会强制执行一次 loadSettingsForCurrentDevice
@@ -148,6 +169,7 @@ class MainActivity : AppCompatActivity() {
                 1. 在多任务界面【锁定】本 App。
                 2. 将本 App 的省电策略修改为【无限制】。
                 3. 关闭系统的全局省电模式。
+                4. 若打开了 常驻通知 选项但是没有出现常驻通知，请授予本 App 通知权限。
             """.trimIndent()
 
             androidx.appcompat.app.AlertDialog.Builder(this)
@@ -196,7 +218,7 @@ class MainActivity : AppCompatActivity() {
             // UI 提示
             if (wasMonitoring) {
                 val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                val willAutoStart = prefs.getBoolean(currentDevicePrefix + KEY_AUTO_START, false)
+                val willAutoStart = prefs.getBoolean(KEY_AUTO_START, false)
                 if (willAutoStart) {
                     Toast.makeText(this, "检测到设备切换：$displayName (已根据配置自动重启控制)", Toast.LENGTH_SHORT).show()
                 } else {
@@ -222,7 +244,8 @@ class MainActivity : AppCompatActivity() {
             putFloat(currentDevicePrefix + KEY_VOL_MIN, volumeRangeSlider.values[0])
             putFloat(currentDevicePrefix + KEY_VOL_MAX, volumeRangeSlider.values[1])
             putInt(currentDevicePrefix + KEY_SAMPLING, samplingSpinner.selectedItemPosition)
-            putBoolean(currentDevicePrefix + KEY_AUTO_START, autoStartSwitch.isChecked)
+            putBoolean(KEY_AUTO_START, autoStartSwitch.isChecked)
+            putBoolean(currentDevicePrefix + KEY_PERSIST_NOTIF, persistNotifSwitch.isChecked)
             apply()
         }
     }
@@ -252,8 +275,9 @@ class MainActivity : AppCompatActivity() {
         maxVolRatio = savedMax / 100f
 
         // 5. 加载自动启动状态
-        val shouldAutoStart = prefs.getBoolean(currentDevicePrefix + KEY_AUTO_START, false)
+        val shouldAutoStart = prefs.getBoolean(KEY_AUTO_START, false)
         autoStartSwitch.isChecked = shouldAutoStart
+        persistNotifSwitch.isChecked = prefs.getBoolean(currentDevicePrefix + KEY_PERSIST_NOTIF, false)
 
         // 6. 核心判定：自动开启
         val hasFineLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -276,6 +300,7 @@ class MainActivity : AppCompatActivity() {
         SpeedMonitorService.minVolRatio = minVolRatio
         SpeedMonitorService.maxVolRatio = maxVolRatio
         SpeedMonitorService.maxHistorySize = maxHistorySize
+        SpeedMonitorService.persistentNotification = persistNotifSwitch.isChecked
     }
 
     private fun setupSamplingSpinner() {
@@ -386,7 +411,38 @@ class MainActivity : AppCompatActivity() {
         btnStart.text = "开始控制音量"
         speedText.text = "当前速度: 0.0 km/h";
         volumeText.text = "当前音量: --%"
-        updateUIState() // 立即解锁控件
+        updateUIState()
+        if (persistNotifSwitch.isChecked) showPersistNotification()
+    }
+
+    private fun showPersistNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(
+                SpeedMonitorService.CHANNEL_ID, "速度监控服务频道",
+                android.app.NotificationManager.IMPORTANCE_LOW
+            )
+            (getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager).createNotificationChannel(channel)
+        }
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java),
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) android.app.PendingIntent.FLAG_IMMUTABLE else 0
+        )
+        val notification = androidx.core.app.NotificationCompat.Builder(this, SpeedMonitorService.CHANNEL_ID)
+            .setContentTitle("骑行音量控制")
+            .setContentText("已就绪，开始控制后将实时显示速度和音量")
+            .setSmallIcon(android.R.drawable.ic_menu_compass)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .build()
+        (getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager).notify(1, notification)
+    }
+
+    private fun cancelPersistNotification() {
+        if (!isMonitoring) {
+            (getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(1)
+        }
     }
 
     private val uiLocationListener = object : LocationListener {

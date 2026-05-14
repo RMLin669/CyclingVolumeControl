@@ -24,6 +24,7 @@ class SpeedMonitorService : Service() {
         var minVolRatio = 0.2f
         var maxVolRatio = 1.0f
         var maxHistorySize = 1
+        var persistentNotification = false
     }
 
     // 1. 定义 locationListener 对象 (解决 Unresolved reference 报错)
@@ -41,6 +42,10 @@ class SpeedMonitorService : Service() {
 
             val maxIndex = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (maxIndex * ratio).toInt(), 0)
+
+            if (persistentNotification) {
+                updateNotification(averageSpeed, (ratio * 100).toInt())
+            }
         }
 
         // 适配旧版本 Android 必须实现的空方法
@@ -107,6 +112,23 @@ class SpeedMonitorService : Service() {
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
+    }
+
+    private fun updateNotification(speed: Float, volumePercent: Int) {
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, notificationIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+        )
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("骑行音量控制中")
+            .setContentText("速度: %.1f km/h  |  音量: %d%%".format(speed, volumePercent))
+            .setSmallIcon(android.R.drawable.ic_menu_compass)
+            .setContentIntent(pendingIntent)
+            .setOnlyAlertOnce(true)
+            .build()
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(1, notification)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
