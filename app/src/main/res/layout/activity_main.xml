@@ -91,17 +91,17 @@
     <!-- 在 deviceTypeText 下方插入 -->
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="26dp"
+        android:layout_marginTop="5dp"
         android:gravity="center_vertical"
-        android:layout_marginTop="5dp">
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="检测到该设备后自动开启控制"
-            android:textSize="13sp"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:text="打开应用检测到该设备后自动开启控制"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="13sp" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/autoStartSwitch"
@@ -115,17 +115,17 @@
     <!-- 通知栏常驻保活开关 -->
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="38dp"
+        android:layout_marginTop="2dp"
         android:gravity="center_vertical"
-        android:layout_marginTop="2dp">
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="通知栏常驻以实现保活"
-            android:textSize="13sp"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="13sp" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/persistNotifSwitch"
@@ -157,153 +157,103 @@
             android:id="@+id/samplingSpinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minHeight="30dp"
+            android:minHeight="3dp"
             android:entries="@array/sampling_options" />
     </LinearLayout>
 
     <!-- 速度和音量自定义设置区 -->
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="20dp"
-        android:paddingHorizontal="30dp">
+        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="4dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorOutlineVariant">
 
-        <!-- 速度设置标题 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="速度区间(km/h) 起始速度 ➔ 目标速度"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="0dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="起始速度 小于 目标速度 则越骑音量越大\n起始速度 大于 目标速度 则越骑音量越小"
-            android:textSize="12sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_gravity="center_horizontal" />
-
-        <!-- 速度滚动选择器容器 -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginTop="10dp">
-
-            <!-- 1. 底层：两个独立的圆角矩形指示器 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <!-- 左侧起始速度背景：宽度约等于两个 NumberPicker(40dp*2) -->
-                <View
-                    android:layout_width="85dp"
-                    android:layout_height="45dp"
-                    android:background="@drawable/bg_picker_selection" />
-
-                <!-- 中间间距：对应分割线 View 的宽度(20dp) + 左右外边距(20dp*2) = 60dp -->
-                <View
-                    android:layout_width="60dp"
-                    android:layout_height="match_parent" />
-
-                <!-- 右侧目标速度背景 -->
-                <View
-                    android:layout_width="85dp"
-                    android:layout_height="45dp"
-                    android:background="@drawable/bg_picker_selection" />
-            </LinearLayout>
-
-            <!-- 2. 顶层：原本的数字选择器逻辑 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <!-- 起始速度 -->
-                <NumberPicker
-                    android:id="@+id/npMinTen"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:selectionDividerHeight="0dp" />
-                <NumberPicker
-                    android:id="@+id/npMinUnit"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:selectionDividerHeight="0dp" />
-
-                <!-- 中间横杠分隔线 -->
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="1dp"
-                    android:background="?android:attr/listDivider"
-                    android:layout_marginHorizontal="20dp"/>
-
-                <!-- 目标速度 -->
-                <NumberPicker
-                    android:id="@+id/npMaxTen"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:selectionDividerHeight="0dp" />
-                <NumberPicker
-                    android:id="@+id/npMaxUnit"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:selectionDividerHeight="0dp" />
-            </LinearLayout>
-        </FrameLayout>
-
-        <!-- 音量设置标题 -->
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="5dp"
-            android:layout_gravity="center_horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="音量区间: "
-                android:textSize="14sp"
-                android:textColor="?android:attr/textColorSecondary"/>
-
-            <TextView
-                android:id="@+id/volumeRangeText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="20% - 100%"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="?android:attr/colorPrimary"/>
-        </LinearLayout>
-
-        <!-- iOS 风格音量滑块 -->
-        <com.google.android.material.slider.RangeSlider
-            android:id="@+id/volumeRangeSlider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:valueFrom="0.0"
-            android:valueTo="100.0"
-            app:values="@array/initial_range_values"
-            app:labelBehavior="gone"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            app:thumbColor="?android:attr/colorPrimary"
-            app:trackColorActive="?android:attr/colorPrimary"
-            app:trackColorInactive="?android:attr/colorControlNormal" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="18dp">
+
+            <!-- 标题行 + 最大速度输入 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <!-- 左侧：标题 + 副标题 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="速度 → 音量曲线"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="拖动控制点调整映射关系"
+                        android:textSize="11sp"
+                        android:layout_marginTop="1dp"
+                        android:textColor="?android:attr/textColorSecondary" />
+                </LinearLayout>
+
+                <!-- 右侧：最大速度 pill 输入框 -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="118dp"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                    android:hint="最大速度"
+                    app:suffixText="km/h"
+                    app:boxCornerRadiusTopStart="24dp"
+                    app:boxCornerRadiusTopEnd="24dp"
+                    app:boxCornerRadiusBottomStart="24dp"
+                    app:boxCornerRadiusBottomEnd="24dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editMaxSpeedX"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:text="40"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:imeOptions="actionDone"
+                        android:singleLine="true" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- 交互式速度-音量坐标图 -->
+            <com.example.cyclingvolumecontrol.SpeedVolumeChartView
+                android:id="@+id/speedVolumeChart"
+                android:layout_width="match_parent"
+                android:layout_height="230dp" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- 5. 控制按钮 -->
     <Button
         android:id="@+id/btnStart"
         android:layout_width="200dp"
         android:layout_height="50dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:backgroundTint="?android:attr/colorPrimary"
         android:enabled="false"
         android:text="开始控制音量"
