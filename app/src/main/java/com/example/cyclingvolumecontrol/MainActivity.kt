@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.location.Location
 import android.location.LocationListener
@@ -16,13 +17,14 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Spinner
+import android.widget.NumberPicker
 import android.widget.TextView
 import android.widget.Toast
+import com.google.android.material.card.MaterialCardView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -36,7 +38,6 @@ class MainActivity : AppCompatActivity() {
     private var currentDevicePrefix = "NONE_"
     private var isMonitoring = false
     private var maxHistorySize = 1
-    private val speedHistory = mutableListOf<Float>()
 
     private lateinit var autoStartSwitch: com.google.android.material.materialswitch.MaterialSwitch
     private lateinit var persistNotifSwitch: com.google.android.material.materialswitch.MaterialSwitch
@@ -49,9 +50,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnStart: Button
     private lateinit var speedText: TextView
     private lateinit var volumeText: TextView
-    private lateinit var samplingSpinner: Spinner
+    private lateinit var samplingSpinner: AutoCompleteTextView
+    private val samplingOptions = arrayOf("1s (实时)", "3s (平滑)", "5s (极稳)")
     private lateinit var speedVolumeChart: SpeedVolumeChartView
     private lateinit var editMaxSpeedX: EditText
+    private lateinit var heroCard: MaterialCardView
 
     // 服务相关
     private lateinit var locationManager: LocationManager
@@ -65,6 +68,16 @@ class MainActivity : AppCompatActivity() {
     private val KEY_P2_VOL    = "p2_vol"
     private val KEY_MAX_SPEED_X = "max_speed_x"
     private val KEY_SAMPLING  = "sampling_pos"
+    private val KEY_THEME_COLOR = "theme_color"
+
+    // 主题色预设
+    private val themeColorMap = mapOf(
+        R.id.themeBlue   to 0xFF1A6EF3.toInt(),
+        R.id.themeGreen  to 0xFF4CAF50.toInt(),
+        R.id.themeOrange to 0xFFFF9800.toInt(),
+        R.id.themePurple to 0xFF9C27B0.toInt(),
+        R.id.themeTeal   to 0xFF009688.toInt(),
+    )
 
     private val requestLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -93,8 +106,12 @@ class MainActivity : AppCompatActivity() {
         persistNotifSwitch = findViewById(R.id.persistNotifSwitch)
         speedVolumeChart   = findViewById(R.id.speedVolumeChart)
         editMaxSpeedX      = findViewById(R.id.editMaxSpeedX)
+        heroCard           = findViewById(R.id.heroCard)
 
-        // 3. 初始化组件
+        // 3. 初始化主题色
+        setupThemeColors()
+
+        // 4. 初始化组件
         setupSamplingSpinner()
         setupSpeedVolumeChart()
 
@@ -150,17 +167,42 @@ class MainActivity : AppCompatActivity() {
                 本 App 获取的位置信息仅用于实时计算速度以调节音量，绝不会进行任何形式的上传或共享。如仍有担忧，您可以在手机系统的「设置」中手动关闭本 App 的联网权限，这不会影响速度监测功能。
 
                 💡 使用建议：
-                1. 在多任务界面【锁定】本 App。
-                2. 将本 App 的省电策略修改为【无限制】。
+                1. 在多任务界面「锁定」本 App。
+                2. 将本 App 的省电策略修改为「无限制」。
                 3. 关闭系统的全局省电模式。
-                4. 若打开了 常驻通知 选项但是没有出现常驻通知，请授予本 App 通知权限。
+                4. 若打开了「常驻通知」选项但是没有出现常驻通知，请授予本 App 通知权限。
+                
+                📚 使用说明：
+                1. 当前速度与音量开始控制后才会实时更新。
+                2. 控制过程中无法调节速度区间与音量区间，如需调节请先停止控制。
+                3. 支持根据本机或者连接不同的蓝牙设备自动切换对应配置。
             """.trimIndent()
             androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("隐私说明与建议")
+                .setTitle("隐私说明、使用建议与使用说明")
                 .setMessage(privacyMessage)
                 .setPositiveButton("我知道了", null)
                 .show()
         }
+    }
+
+    private fun setupThemeColors() {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val saved = prefs.getInt(KEY_THEME_COLOR, 0xFF1A6EF3.toInt())
+        applyThemeColor(saved)
+
+        themeColorMap.forEach { (id, color) ->
+            findViewById<View>(id).setOnClickListener {
+                applyThemeColor(color)
+            }
+        }
+    }
+
+    private fun applyThemeColor(color: Int) {
+        heroCard.setCardBackgroundColor(color)
+        btnStart.backgroundTintList = ColorStateList.valueOf(color)
+        speedVolumeChart.primaryColorOverride = color
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putInt(KEY_THEME_COLOR, color).apply()
     }
 
     private fun setupSpeedVolumeChart() {
@@ -170,7 +212,10 @@ class MainActivity : AppCompatActivity() {
             if (isMonitoring) syncToService()
         }
 
-        // 最大速度输入框
+        // 最大速度输入框 - 点击弹出滚轮选择
+        editMaxSpeedX.setOnClickListener {
+            if (!isMonitoring) showMaxSpeedPicker()
+        }
         editMaxSpeedX.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -184,21 +229,47 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun setupSamplingSpinner() {
-        val options = arrayOf("1s (实时)", "3s (平滑)", "5s (极稳)")
-        samplingSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, options).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    private fun showMaxSpeedPicker() {
+        val current = editMaxSpeedX.text.toString().toIntOrNull()?.coerceIn(10, 300) ?: 40
+        val dialogView = layoutInflater.inflate(R.layout.dialog_max_speed_picker, null)
+        val tensPicker = dialogView.findViewById<NumberPicker>(R.id.pickerTens)
+        val onesPicker = dialogView.findViewById<NumberPicker>(R.id.pickerOnes)
+
+        tensPicker.apply {
+            minValue = 0; maxValue = 9
+            value = current / 10
+            wrapSelectorWheel = true
         }
-        samplingSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
-                maxHistorySize = when (pos) { 0 -> 1; 1 -> 3; 2 -> 5; else -> 1 }
-                speedHistory.clear()
-                if (v != null) {
-                    saveSettings()
-                    if (isMonitoring) syncToService()
-                }
-            }
-            override fun onNothingSelected(p: AdapterView<*>?) {}
+        onesPicker.apply {
+            minValue = 0; maxValue = 9
+            value = current % 10
+            wrapSelectorWheel = true
+        }
+
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this, R.style.MaxSpeedDialog)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<Button>(R.id.btnConfirm).setOnClickListener {
+            val v = tensPicker.value * 10 + onesPicker.value
+            editMaxSpeedX.setText(v.coerceIn(10, 300).toString())
+            dialog.dismiss()
+        }
+
+        dialog.show()
+        // 圆角弹窗
+        dialog.window?.setBackgroundDrawable(
+            android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+        )
+    }
+
+    private fun setupSamplingSpinner() {
+        samplingSpinner.setAdapter(ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, samplingOptions))
+        samplingSpinner.setOnItemClickListener { _, _, pos, _ ->
+            maxHistorySize = when (pos) { 0 -> 1; 1 -> 3; 2 -> 5; else -> 1 }
+            saveSettings()
+            if (isMonitoring) syncToService()
         }
     }
 
@@ -228,7 +299,7 @@ class MainActivity : AppCompatActivity() {
 
             if (wasMonitoring) {
                 val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                val willAutoStart = prefs.getBoolean(KEY_AUTO_START, false)
+                val willAutoStart = prefs.getBoolean(newPrefix + KEY_AUTO_START, false)
                 if (willAutoStart) {
                     Toast.makeText(this, "检测到设备切换：$displayName (已根据配置自动重启控制)", Toast.LENGTH_SHORT).show()
                 } else {
@@ -294,8 +365,8 @@ class MainActivity : AppCompatActivity() {
             putFloat(currentDevicePrefix + KEY_P2_SPEED,   speedVolumeChart.point2Speed)
             putFloat(currentDevicePrefix + KEY_P2_VOL,     speedVolumeChart.point2Vol)
             putFloat(currentDevicePrefix + KEY_MAX_SPEED_X, speedVolumeChart.maxSpeedX)
-            putInt(currentDevicePrefix + KEY_SAMPLING, samplingSpinner.selectedItemPosition)
-            putBoolean(KEY_AUTO_START, autoStartSwitch.isChecked)
+            putInt(currentDevicePrefix + KEY_SAMPLING, samplingOptions.indexOfFirst { it == samplingSpinner.text.toString() }.coerceAtLeast(0))
+            putBoolean(currentDevicePrefix + KEY_AUTO_START, autoStartSwitch.isChecked)
             putBoolean(currentDevicePrefix + KEY_PERSIST_NOTIF, persistNotifSwitch.isChecked)
             apply()
         }
@@ -320,12 +391,11 @@ class MainActivity : AppCompatActivity() {
 
         // 恢复采样
         val savedSamplingPos = prefs.getInt(currentDevicePrefix + KEY_SAMPLING, 0)
-        samplingSpinner.setSelection(savedSamplingPos)
+        samplingSpinner.setText(samplingOptions[savedSamplingPos], false)
         maxHistorySize = when (savedSamplingPos) { 0 -> 1; 1 -> 3; 2 -> 5; else -> 1 }
-        speedHistory.clear()
 
         // 恢复开关状态
-        val shouldAutoStart = prefs.getBoolean(KEY_AUTO_START, false)
+        val shouldAutoStart = prefs.getBoolean(currentDevicePrefix + KEY_AUTO_START, false)
         autoStartSwitch.isChecked = shouldAutoStart
         persistNotifSwitch.isChecked = prefs.getBoolean(currentDevicePrefix + KEY_PERSIST_NOTIF, false)
 
@@ -397,7 +467,7 @@ class MainActivity : AppCompatActivity() {
         locationManager.removeUpdates(uiLocationListener)
         isMonitoring = false
         btnStart.text = "开始控制音量"
-        speedText.text = "当前速度: 0.0 km/h"
+        speedText.text = "0.0 km/h"
         volumeText.text = "当前音量: --%"
         updateUIState()
         if (persistNotifSwitch.isChecked) showPersistNotification()
@@ -436,7 +506,7 @@ class MainActivity : AppCompatActivity() {
     private val uiLocationListener = object : LocationListener {
         override fun onLocationChanged(l: Location) {
             val s = l.speed * 3.6f
-            speedText.text = "当前速度: %.1f km/h".format(s)
+            speedText.text = "%.1f km/h".format(s)
 
             val p1Speed = speedVolumeChart.point1Speed
             val p1Vol   = speedVolumeChart.point1Vol / 100f

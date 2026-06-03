@@ -2,4 +2,27 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 主色调 - 骑行活力蓝 -->
+    <color name="primary">#FF1A6EF3</color>
+    <color name="primary_container">#FFD6E3FF</color>
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="on_primary_container">#FF001B3D</color>
+
+    <!-- 次要色 -->
+    <color name="secondary">#FF535F70</color>
+    <color name="secondary_container">#FFD7E3F7</color>
+
+    <!-- 表面色 -->
+    <color name="surface">#FFFDFBFF</color>
+    <color name="surface_variant">#FFE0E2EC</color>
+
+    <!-- Hero 卡片渐变 -->
+    <color name="hero_start">#FF1A6EF3</color>
+    <color name="hero_end">#FF4A90D9</color>
+
+    <!-- 图表颜色 -->
+    <color name="chart_fill">#331A6EF3</color>
+    <color name="chart_line">#FF1A6EF3</color>
+    <color name="chart_glow">#401A6EF3</color>
 </resources>

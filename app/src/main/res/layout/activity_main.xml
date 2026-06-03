@@ -1,277 +1,401 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:gravity="top|center_horizontal"
-    android:background="?android:attr/colorBackground">
+    android:fillViewport="true"
+    android:background="?android:attr/colorBackground"
+    android:clipToPadding="false">
 
-    <!-- 1. 隐私安全提示 - 修改为按钮触发弹窗 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="0dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="24dp"
+        android:gravity="center_horizontal">
 
-        <Button
-            android:id="@+id/btnShowPrivacy"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="点击查看隐私说明与使用建议 ▾"
-            android:textSize="12sp"
-            android:textColor="?android:attr/textColorSecondary" />
-
-        <!-- 注意：这里删除了之前的 privacyDetailsText，因为我们要用弹窗显示 -->
-    </LinearLayout>
-
-
-    <!-- 2. 权限行：修改按钮样式为有背景的样式 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="0dp"
-        android:paddingHorizontal="70dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="GPS 精确位置权限"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:textColor="?android:attr/textColorPrimary" />
-
-        <Button
-            android:id="@+id/btnPermissionFine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="授权"
-            android:minWidth="10dp" />
-    </LinearLayout>
-
-    <!-- 3. 速度和音量显示 -->
-    <TextView
-        android:id="@+id/speedText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="当前速度: 0.0 km/h"
-        android:textSize="30sp"
-        android:textColor="?android:attr/colorPrimary"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/volumeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:text="当前音量: 0%"
-        android:textSize="25sp"
-        android:textColor="?android:attr/colorPrimary"/>
-
-    <!-- 修改设备显示文本的 ID 含义 -->
-    <TextView
-        android:id="@+id/deviceTypeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:text="当前配置: 检测中..."
-        android:textSize="14sp"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="4dp"
-        android:background="@drawable/bg_picker_selection"
-        android:textColor="?android:attr/colorPrimary"
-        android:textStyle="bold" />
-
-    <!-- 在 deviceTypeText 下方插入 -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="26dp"
-        android:layout_marginTop="5dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="打开应用检测到该设备后自动开启控制"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="13sp" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/autoStartSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:scaleX="0.8"
-            android:scaleY="0.8" />
-    </LinearLayout>
-
-    <!-- 通知栏常驻保活开关 -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="38dp"
-        android:layout_marginTop="2dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="通知栏常驻以实现保活"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="13sp" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/persistNotifSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:scaleX="0.8"
-            android:scaleY="0.8" />
-    </LinearLayout>
-
-    <!-- 4. 采样平滑设置 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="0dp"
-        android:paddingHorizontal="60dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="速度采样平滑 (秒):"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="14sp" />
-
-        <Spinner
-            android:id="@+id/samplingSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="3dp"
-            android:entries="@array/sampling_options" />
-    </LinearLayout>
-
-    <!-- 速度和音量自定义设置区 -->
-    <com.google.android.material.card.MaterialCardView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginHorizontal="4dp"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="1dp"
-        app:strokeColor="?attr/colorOutlineVariant">
-
+        <!-- ═══════ 2. 隐私说明 + 主题色选择 ═══════ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="18dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="4dp">
 
-            <!-- 标题行 + 最大速度输入 -->
+            <Button
+                android:id="@+id/btnShowPrivacy"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:text="隐私说明、使用建议与使用说明"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:gravity="start|center_vertical" />
+
+            <!-- 主题色选择 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="4dp">
+
+                <View
+                    android:id="@+id/themeBlue"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:background="@drawable/bg_theme_blue"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <View
+                    android:id="@+id/themeGreen"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:background="@drawable/bg_theme_green"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <View
+                    android:id="@+id/themeOrange"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:background="@drawable/bg_theme_orange"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <View
+                    android:id="@+id/themePurple"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:background="@drawable/bg_theme_purple"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <View
+                    android:id="@+id/themeTeal"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:background="@drawable/bg_theme_teal"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ═══════ 1. 速度/音量 英雄显示区 ═══════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/heroCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/primary"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:id="@+id/speedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.0 km/h"
+                    android:textSize="40sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/volumeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="音量 --%"
+                    android:textSize="22sp"
+                    android:textColor="#CCFFFFFF" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══════ 3. GPS 权限卡片 ═══════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="1dp"
+            app:cardBackgroundColor="?attr/colorSurfaceVariant"
+            app:strokeWidth="0dp"
+            android:alpha="0.95">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="10dp">
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="8dp">
 
-                <!-- 左侧：标题 + 副标题 -->
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:text="GPS 精确定位"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?android:attr/textColorPrimary" />
+
+                <Button
+                    android:id="@+id/btnPermissionFine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="授权"
+                    android:minWidth="64dp"
+                    android:textSize="12sp"
+                    android:insetTop="0dp"
+                    android:insetBottom="2dp"
+                    style="@style/Widget.Material3.Button.TonalButton" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══════ 4. 设备检测 + 自动控制卡片 ═══════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="1dp"
+            app:cardBackgroundColor="?attr/colorSurfaceVariant"
+            app:strokeWidth="0dp"
+            android:alpha="0.95">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp">
+
+                <!-- 设备名 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_dot_green" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:id="@+id/deviceTypeText"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="速度 → 音量曲线"
-                        android:textSize="15sp"
+                        android:text="检测中..."
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="拖动控制点调整映射关系"
-                        android:textSize="11sp"
-                        android:layout_marginTop="1dp"
-                        android:textColor="?android:attr/textColorSecondary" />
                 </LinearLayout>
 
-                <!-- 右侧：最大速度 pill 输入框 -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="118dp"
+                <!-- 自动启动 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-                    android:hint="最大速度"
-                    app:suffixText="km/h"
-                    app:boxCornerRadiusTopStart="24dp"
-                    app:boxCornerRadiusTopEnd="24dp"
-                    app:boxCornerRadiusBottomStart="24dp"
-                    app:boxCornerRadiusBottomEnd="24dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editMaxSpeedX"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:text="40"
-                        android:textSize="14sp"
-                        android:gravity="center"
-                        android:imeOptions="actionDone"
-                        android:singleLine="true" />
+                        android:text="检测到设备后打开 APP 自动控制音量"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/autoStartSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:scaleX="1"
+                        android:scaleY="1" />
+                </LinearLayout>
+
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            <!-- 交互式速度-音量坐标图 -->
-            <com.example.cyclingvolumecontrol.SpeedVolumeChartView
-                android:id="@+id/speedVolumeChart"
+        <!-- ═══════ 5. 通知栏保活卡片 ═══════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="1dp"
+            app:cardBackgroundColor="?attr/colorSurfaceVariant"
+            app:strokeWidth="0dp"
+            android:alpha="0.95">
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="230dp" />
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="8dp">
 
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="常驻通知栏保活"
+                    android:textSize="16sp"
+                    android:textColor="?android:attr/textColorPrimary" />
 
-    <!-- 5. 控制按钮 -->
-    <Button
-        android:id="@+id/btnStart"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="10dp"
-        android:backgroundTint="?android:attr/colorPrimary"
-        android:enabled="false"
-        android:text="开始控制音量"
-        android:textSize="20sp"
-        style="@style/Widget.MaterialComponents.Button"
-        android:textColor="?attr/colorOnPrimary"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        app:cornerRadius="25dp" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/persistNotifSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleX="1"
+                    android:scaleY="1" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:padding="16dp"
-        android:text="当前速度与音量开始控制后才会实时更新。\n控制过程中无法调节速度区间与音量区间，如需调节请先暂停控制。"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="12sp"
-        android:lineSpacingExtra="4dp"
-        android:layout_marginBottom="0dp" />
+        <!-- ═══════ 6. 速度-音量曲线卡片 ═══════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="?attr/colorOutlineVariant"
+            app:cardBackgroundColor="?attr/colorSurface">
 
-</LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <!-- 标题居中 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="速度 → 音量曲线"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:gravity="center"
+                    android:layout_marginBottom="2dp" />
+
+                <!-- 采样平滑 + 最大速度 并排 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp"
+                    android:baselineAligned="false">
+
+                    <!-- 采样平滑 -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                        android:hint="采样平滑"
+                        app:endIconMode="dropdown_menu"
+                        app:boxCornerRadiusTopStart="100dp"
+                        app:boxCornerRadiusTopEnd="100dp"
+                        app:boxCornerRadiusBottomStart="100dp"
+                        app:boxCornerRadiusBottomEnd="100dp"
+                        app:boxStrokeWidth="1dp"
+                        app:boxStrokeWidthFocused="1.5dp">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/samplingSpinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:gravity="center"
+                            android:textSize="14sp"
+                            android:minHeight="40dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- 最大速度 -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                        android:hint="最大速度"
+                        app:suffixText="km/h"
+                        app:boxCornerRadiusTopStart="100dp"
+                        app:boxCornerRadiusTopEnd="100dp"
+                        app:boxCornerRadiusBottomStart="100dp"
+                        app:boxCornerRadiusBottomEnd="100dp"
+                        app:boxStrokeWidth="1dp"
+                        app:boxStrokeWidthFocused="1.5dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editMaxSpeedX"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:cursorVisible="false"
+                            android:text="40"
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:singleLine="true" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <!-- 图表 -->
+                <com.example.cyclingvolumecontrol.SpeedVolumeChartView
+                    android:id="@+id/speedVolumeChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══════ 7. 开始/停止按钮 ═══════ -->
+        <Button
+            android:id="@+id/btnStart"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="6dp"
+            android:enabled="false"
+            android:text="开始控制音量"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnPrimary"
+            style="@style/Widget.Material3.Button"
+            app:cornerRadius="27dp"
+            app:backgroundTint="?attr/colorPrimary" />
+
+    </LinearLayout>
+</ScrollView>
