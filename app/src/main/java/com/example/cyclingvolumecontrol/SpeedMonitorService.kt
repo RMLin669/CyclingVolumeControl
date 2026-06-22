@@ -17,6 +17,13 @@ class SpeedMonitorService : Service() {
     private lateinit var audioManager: AudioManager
     private val speedHistory = mutableListOf<Float>()
 
+    // 省电：自适应 GPS 策略
+    private var stationaryCount = 0
+    private var isLowPowerMode = false
+    private var lastNotificationTime = 0L
+    private var lastSetVolumeIndex = -1
+    private var maxVolumeIndex = -1
+
     companion object {
         const val CHANNEL_ID = "SpeedMonitorServiceChannel"
         var minSpeed = 5f
@@ -25,6 +32,19 @@ class SpeedMonitorService : Service() {
         var maxVolRatio = 1.0f
         var maxHistorySize = 1
         var persistentNotification = false
+
+        // Activity 轮询用：Service 每次计算后更新，Activity 定时读取
+        @Volatile var lastSpeed = 0f
+        @Volatile var lastVolumePercent = 0
+
+        // 省电：自适应 GPS 参数
+        const val NORMAL_INTERVAL = 1000L
+        const val NORMAL_DISTANCE = 5f
+        const val LOW_POWER_INTERVAL = 10000L
+        const val LOW_POWER_DISTANCE = 50f
+        const val STATIONARY_SPEED_THRESHOLD = 0.5f
+        const val STATIONARY_COUNT_THRESHOLD = 5
+        const val NOTIFICATION_THROTTLE_MS = 5000L
     }
 
     // 1. 定义 locationListener 对象 (解决 Unresolved reference 报错)
@@ -37,14 +57,42 @@ class SpeedMonitorService : Service() {
             }
             val averageSpeed = speedHistory.average().toFloat()
 
+            // 静止检测：连续低速则切换到省电模式
+            if (averageSpeed < STATIONARY_SPEED_THRESHOLD) {
+                stationaryCount++
+                if (stationaryCount >= STATIONARY_COUNT_THRESHOLD && !isLowPowerMode) {
+                    isLowPowerMode = true
+                    applyGpsPolicy()
+                }
+            } else {
+                stationaryCount = 0
+                if (isLowPowerMode) {
+                    isLowPowerMode = false
+                    applyGpsPolicy()
+                }
+            }
+
             // 调用计算逻辑
             val ratio = calculateVolumeRatio(averageSpeed)
+            val volumePct = (ratio * 100).toInt()
 
-            val maxIndex = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (maxIndex * ratio).toInt(), 0)
+            // 音量去重：目标值没变就不调 setStreamVolume，省掉 AudioManager IPC
+            val targetIndex = (maxVolumeIndex * ratio).toInt()
+            if (targetIndex != lastSetVolumeIndex) {
+                lastSetVolumeIndex = targetIndex
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetIndex, 0)
+            }
+
+            // 写入静态字段供 Activity 轮询
+            lastSpeed = averageSpeed
+            lastVolumePercent = volumePct
 
             if (persistentNotification) {
-                updateNotification(averageSpeed, (ratio * 100).toInt())
+                val now = System.currentTimeMillis()
+                if (now - lastNotificationTime >= NOTIFICATION_THROTTLE_MS) {
+                    lastNotificationTime = now
+                    updateNotification(averageSpeed, volumePct)
+                }
             }
         }
 
@@ -77,6 +125,7 @@ class SpeedMonitorService : Service() {
         super.onCreate()
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        maxVolumeIndex = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -102,11 +151,21 @@ class SpeedMonitorService : Service() {
     }
 
     private fun startLocationUpdates() {
+        applyGpsPolicy()
+    }
+
+    private fun applyGpsPolicy() {
         try {
+            locationManager.removeUpdates(locationListener)
+            val (interval, distance) = if (isLowPowerMode) {
+                LOW_POWER_INTERVAL to LOW_POWER_DISTANCE
+            } else {
+                NORMAL_INTERVAL to NORMAL_DISTANCE
+            }
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
-                1000L,
-                0f,
+                interval,
+                distance,
                 locationListener
             )
         } catch (e: SecurityException) {

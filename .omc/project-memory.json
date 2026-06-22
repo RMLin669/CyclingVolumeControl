@@ -79,33 +79,33 @@
   },
   "hotPaths": [
     {
+      "path": "app/src/main/java/com/example/cyclingvolumecontrol/SpeedMonitorService.kt",
+      "accessCount": 13,
+      "lastAccessed": 1782097873376,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/java/com/example/cyclingvolumecontrol/MainActivity.kt",
+      "accessCount": 13,
+      "lastAccessed": 1782097925729,
+      "type": "file"
+    },
+    {
       "path": "",
       "accessCount": 7,
       "lastAccessed": 1782092319618,
       "type": "directory"
     },
     {
-      "path": "app/src/main/java/com/example/cyclingvolumecontrol/MainActivity.kt",
-      "accessCount": 5,
-      "lastAccessed": 1782092610025,
-      "type": "file"
-    },
-    {
-      "path": "app/src/main/java/com/example/cyclingvolumecontrol/SpeedMonitorService.kt",
-      "accessCount": 1,
-      "lastAccessed": 1782092304751,
+      "path": "app/src/main/AndroidManifest.xml",
+      "accessCount": 2,
+      "lastAccessed": 1782097065216,
       "type": "file"
     },
     {
       "path": "app/src/main/java/com/example/cyclingvolumecontrol/SpeedVolumeChartView.kt",
       "accessCount": 1,
       "lastAccessed": 1782092304962,
-      "type": "file"
-    },
-    {
-      "path": "app/src/main/AndroidManifest.xml",
-      "accessCount": 1,
-      "lastAccessed": 1782092305497,
       "type": "file"
     },
     {

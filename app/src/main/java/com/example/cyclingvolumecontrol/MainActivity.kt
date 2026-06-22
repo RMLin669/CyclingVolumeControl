@@ -6,14 +6,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.media.AudioDeviceCallback
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -58,8 +57,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var heroCard: MaterialCardView
 
     // 服务相关
-    private lateinit var locationManager: LocationManager
     private lateinit var audioManager: AudioManager
+    private val uiPollHandler = Handler(Looper.getMainLooper())
+    private val uiPollInterval = 3000L
 
     // 常量
     private val PREFS_NAME = "CyclingSettings"
@@ -94,7 +94,6 @@ class MainActivity : AppCompatActivity() {
 
         // 1. 初始化系统服务
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // 2. 绑定 UI
         btnPermissionFine  = findViewById(R.id.btnPermissionFine)
@@ -457,10 +456,8 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, SpeedMonitorService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent)
             else startService(intent)
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER, 1000L, 0f, uiLocationListener
-            )
             isMonitoring = true
+            uiPollHandler.post(uiPollRunnable)
             btnStart.text = "⏹ 停止控制"
             updateUIState()
         }
@@ -468,7 +465,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopSpeedMonitoring() {
         stopService(Intent(this, SpeedMonitorService::class.java))
-        locationManager.removeUpdates(uiLocationListener)
+        uiPollHandler.removeCallbacks(uiPollRunnable)
         isMonitoring = false
         btnStart.text = "开始控制音量"
         speedText.text = "0.0 km/h"
@@ -507,36 +504,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val uiLocationListener = object : LocationListener {
-        override fun onLocationChanged(l: Location) {
-            val s = l.speed * 3.6f
-            speedText.text = "%.1f km/h".format(s)
-
-            val p1Speed = speedVolumeChart.point1Speed
-            val p1Vol   = speedVolumeChart.point1Vol / 100f
-            val p2Speed = speedVolumeChart.point2Speed
-            val p2Vol   = speedVolumeChart.point2Vol / 100f
-
-            val ratio = if (p1Speed < p2Speed) {
-                when {
-                    s <= p1Speed -> p1Vol
-                    s >= p2Speed -> p2Vol
-                    else -> p1Vol + (p2Vol - p1Vol) * (s - p1Speed) / (p2Speed - p1Speed)
-                }
-            } else if (p1Speed > p2Speed) {
-                when {
-                    s >= p1Speed -> p1Vol
-                    s <= p2Speed -> p2Vol
-                    else -> p1Vol + (p2Vol - p1Vol) * (s - p1Speed) / (p2Speed - p1Speed)
-                }
-            } else {
-                p1Vol
-            }
-            volumeText.text = "当前音量: %d%%".format((ratio * 100).toInt())
+    // UI 轮询：每 3s 从 Service 静态字段读取速度/音量，省掉独立 GPS Listener
+    private val uiPollRunnable = object : Runnable {
+        override fun run() {
+            if (!isMonitoring) return
+            val speed = SpeedMonitorService.lastSpeed
+            speedText.text = "%.1f km/h".format(speed)
+            volumeText.text = "当前音量: %d%%".format(SpeedMonitorService.lastVolumePercent)
+            uiPollHandler.postDelayed(this, uiPollInterval)
         }
-        override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
-        override fun onProviderEnabled(p: String) {}
-        override fun onProviderDisabled(p: String) {}
     }
 
     override fun onResume() { super.onResume(); updateUIState() }
