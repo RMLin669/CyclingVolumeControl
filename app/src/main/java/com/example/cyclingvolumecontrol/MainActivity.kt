@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var currentDevicePrefix = "NONE_"
     private var isMonitoring = false
     private var maxHistorySize = 1
+    private var isLoadingSettings = false
 
     private lateinit var autoStartSwitch: com.google.android.material.materialswitch.MaterialSwitch
     private lateinit var persistNotifSwitch: com.google.android.material.materialswitch.MaterialSwitch
@@ -357,14 +358,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveSettings() {
-        if (currentDevicePrefix == "NONE_") return
+        if (currentDevicePrefix == "NONE_" || isLoadingSettings) return
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().apply {
             putFloat(currentDevicePrefix + KEY_P1_SPEED,   speedVolumeChart.point1Speed)
             putFloat(currentDevicePrefix + KEY_P1_VOL,     speedVolumeChart.point1Vol)
             putFloat(currentDevicePrefix + KEY_P2_SPEED,   speedVolumeChart.point2Speed)
             putFloat(currentDevicePrefix + KEY_P2_VOL,     speedVolumeChart.point2Vol)
-            putFloat(currentDevicePrefix + KEY_MAX_SPEED_X, speedVolumeChart.maxSpeedX)
+            putFloat(KEY_MAX_SPEED_X, speedVolumeChart.maxSpeedX)
             putInt(currentDevicePrefix + KEY_SAMPLING, samplingOptions.indexOfFirst { it == samplingSpinner.text.toString() }.coerceAtLeast(0))
             putBoolean(currentDevicePrefix + KEY_AUTO_START, autoStartSwitch.isChecked)
             putBoolean(currentDevicePrefix + KEY_PERSIST_NOTIF, persistNotifSwitch.isChecked)
@@ -373,6 +374,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadSettingsForCurrentDevice() {
+        isLoadingSettings = true
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         // 旧版数据迁移（v1.2 → v1.3+）
@@ -383,7 +385,7 @@ class MainActivity : AppCompatActivity() {
         speedVolumeChart.point1Vol   = prefs.getFloat(currentDevicePrefix + KEY_P1_VOL,   20f)
         speedVolumeChart.point2Speed = prefs.getFloat(currentDevicePrefix + KEY_P2_SPEED, 30f)
         speedVolumeChart.point2Vol   = prefs.getFloat(currentDevicePrefix + KEY_P2_VOL,   100f)
-        val maxX = prefs.getFloat(currentDevicePrefix + KEY_MAX_SPEED_X, 40f)
+        val maxX = prefs.getFloat(KEY_MAX_SPEED_X, 40f)
         speedVolumeChart.maxSpeedX   = maxX
 
         // 同步最大速度输入框（不触发 TextWatcher 保存）
@@ -398,6 +400,8 @@ class MainActivity : AppCompatActivity() {
         val shouldAutoStart = prefs.getBoolean(currentDevicePrefix + KEY_AUTO_START, false)
         autoStartSwitch.isChecked = shouldAutoStart
         persistNotifSwitch.isChecked = prefs.getBoolean(currentDevicePrefix + KEY_PERSIST_NOTIF, false)
+
+        isLoadingSettings = false
 
         // 自动开启判定
         val hasFineLocation = ActivityCompat.checkSelfPermission(

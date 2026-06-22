@@ -1,0 +1,185 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1782092274290,
+  "projectRoot": "/Users/shmilinghongjin/AndroidStudioProjects/CyclingVolumeControl",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Kotlin",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "build.gradle.kts"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "gradle",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "app"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "app": {
+      "path": "app",
+      "purpose": "Application code",
+      "fileCount": 4,
+      "lastAccessed": 1782092274274,
+      "keyFiles": [
+        "build.gradle.kts",
+        "proguard-rules.pro"
+      ]
+    },
+    "gradle": {
+      "path": "gradle",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1782092274275,
+      "keyFiles": [
+        "libs.versions.toml"
+      ]
+    },
+    "app/build": {
+      "path": "app/build",
+      "purpose": "Build output",
+      "fileCount": 1,
+      "lastAccessed": 1782092274275,
+      "keyFiles": []
+    },
+    "app/src": {
+      "path": "app/src",
+      "purpose": "Source code",
+      "fileCount": 1,
+      "lastAccessed": 1782092274276,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "",
+      "accessCount": 7,
+      "lastAccessed": 1782092319618,
+      "type": "directory"
+    },
+    {
+      "path": "app/src/main/java/com/example/cyclingvolumecontrol/MainActivity.kt",
+      "accessCount": 5,
+      "lastAccessed": 1782092610025,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/java/com/example/cyclingvolumecontrol/SpeedMonitorService.kt",
+      "accessCount": 1,
+      "lastAccessed": 1782092304751,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/java/com/example/cyclingvolumecontrol/SpeedVolumeChartView.kt",
+      "accessCount": 1,
+      "lastAccessed": 1782092304962,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/AndroidManifest.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092305497,
+      "type": "file"
+    },
+    {
+      "path": "settings.gradle.kts",
+      "accessCount": 1,
+      "lastAccessed": 1782092306219,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1782092306413,
+      "type": "file"
+    },
+    {
+      "path": "gradle.properties",
+      "accessCount": 1,
+      "lastAccessed": 1782092306675,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/res/layout/activity_main.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092313765,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/res/layout/dialog_max_speed_picker.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092313972,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/res/values/strings.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092314202,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/res/values/colors.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092314477,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/res/values/themes.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092314691,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/res/values-night/themes.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092314947,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/res/xml/backup_rules.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092315232,
+      "type": "file"
+    },
+    {
+      "path": "app/src/main/res/xml/data_extraction_rules.xml",
+      "accessCount": 1,
+      "lastAccessed": 1782092315458,
+      "type": "file"
+    },
+    {
+      "path": "gradle/libs.versions.toml",
+      "accessCount": 1,
+      "lastAccessed": 1782092319220,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
